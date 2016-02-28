@@ -13,18 +13,14 @@ else
     [[ "${line[0]}" == "#"* || "${line[1]}" == "" ]] && continue
 
     if [[ $APP == *"${line[0]}"* ]]; then
-      app_root="$TMP_WORK_DIR/${line[1]}"
       dokku_log_info2 "Installing from ./${line[1]}"
 
-      pushd "$root" > /dev/null
-        if [[ -f Dockerfile ]] && [[ "$([[ -f .env ]] && grep -q BUILDPACK_URL .env; echo $?)" != "0" ]] && [[ ! -f ".buildpacks" ]]; then
-          plugn trigger pre-receive-app "$APP" "dockerfile" "$root" "$REV"
-          dokku receive "$APP" "dockerfile" "$app_root" | sed -u "s/^/"$'\e[1G'"/"
-        else
-          plugn trigger pre-receive-app "$app_name" "herokuish" "$root" "$REV"
-          dokku receive "$APP" "herokuish" "$app_root" | sed -u "s/^/"$'\e[1G'"/"
-        fi
-      popd > /dev/null
+      app_root="$TMP_WORK_DIR/${line[1]}"
+      temp_dir=$(mktemp -u)
+
+      mv $app_root $temp_dir
+      rm -rf $TMP_WORK_DIR/*
+      mv $temp_dir/* $TMP_WORK_DIR
 
       exit
     fi
