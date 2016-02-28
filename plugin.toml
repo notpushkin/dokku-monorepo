@@ -1,0 +1,4 @@
+[plugin]
+description = "Deploy all apps from a monorepo."
+version = "0.1.0"
+[plugin.config]
