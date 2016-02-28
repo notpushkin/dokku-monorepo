@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
-source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
-
-APP="$1"; REV="$2"
-dokku_log_info2 "Monorepo detector huuh."
-
-# Don't trigger a real build if it's a monorepo:
-[[ -f "$DOKKU_ROOT/$APP/IS_MONOREPO" ]]

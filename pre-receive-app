@@ -10,21 +10,26 @@ else
   dokku_log_info2 "Monorepo detected"
 
   while IFS="=" read -u 10 -a line; do
-    if [[ "${line[0]}" == "${APP##*-}" ]]; then
+    [[ "${line[0]}" == "#"* || "${line[1]}" == "" ]] && continue
+
+    if [[ $APP == *"${line[0]}"* ]]; then
       app_root="$TMP_WORK_DIR/${line[1]}"
-      dokku_log_info1 "Installing from ./${line[1]}"
+      dokku_log_info2 "Installing from ./${line[1]}"
 
       pushd "$root" > /dev/null
-      if [[ -f Dockerfile ]] && [[ "$([[ -f .env ]] && grep -q BUILDPACK_URL .env; echo $?)" != "0" ]] && [[ ! -f ".buildpacks" ]]; then
-        plugn trigger pre-receive-app "$APP" "dockerfile" "$root" "$REV"
-        dokku receive "$APP" "dockerfile" "$app_root" | sed -u "s/^/"$'\e[1G'"/"
-      else
-        plugn trigger pre-receive-app "$app_name" "herokuish" "$root" "$REV"
-        dokku receive "$APP" "herokuish" "$app_root" | sed -u "s/^/"$'\e[1G'"/"
-      fi
+        if [[ -f Dockerfile ]] && [[ "$([[ -f .env ]] && grep -q BUILDPACK_URL .env; echo $?)" != "0" ]] && [[ ! -f ".buildpacks" ]]; then
+          plugn trigger pre-receive-app "$APP" "dockerfile" "$root" "$REV"
+          dokku receive "$APP" "dockerfile" "$app_root" | sed -u "s/^/"$'\e[1G'"/"
+        else
+          plugn trigger pre-receive-app "$app_name" "herokuish" "$root" "$REV"
+          dokku receive "$APP" "herokuish" "$app_root" | sed -u "s/^/"$'\e[1G'"/"
+        fi
       popd > /dev/null
+
+      exit
     fi
   done 10<"$TMP_WORK_DIR/.dokku-monorepo"
 
-  false
+  dokku_log_info2 "The application $APP is not defined in .dokku-monorepo!"
+  exit 1
 fi
