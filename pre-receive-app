@@ -4,28 +4,25 @@ source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
 
 APP="$1"; IMAGE_SOURCE_TYPE="$2"; TMP_WORK_DIR="$3"; REV="$4"
 
-if [[ ! -f "$TMP_WORK_DIR/.dokku-monorepo" ]]; then
-  true
-else
-  dokku_log_info2 "Monorepo detected"
+[[ ! -f "$TMP_WORK_DIR/.dokku-monorepo" ]] && exit
 
-  while IFS="=" read -u 10 -a line; do
-    [[ "${line[0]}" == "#"* || "${line[1]}" == "" ]] && continue
+dokku_log_info2 "Monorepo detected"
 
-    if [[ $APP == *"${line[0]}"* ]]; then
-      dokku_log_info2 "Installing from ./${line[1]}"
+while IFS="=" read -u 10 -a line; do
+  [[ "${line[0]}" == "#"* || "${line[1]}" == "" ]] && continue
+  [[ $APP != *"${line[0]}"* ]] && continue
 
-      app_root="$TMP_WORK_DIR/${line[1]}"
-      temp_dir=$(mktemp -u)
+  dokku_log_info2 "Installing from ./${line[1]}"
 
-      mv $app_root $temp_dir
-      rm -rf $TMP_WORK_DIR/*
-      mv $temp_dir/* $TMP_WORK_DIR
+  app_root="$TMP_WORK_DIR/${line[1]}"
+  temp_dir=$(mktemp -u)
 
-      exit
-    fi
-  done 10<"$TMP_WORK_DIR/.dokku-monorepo"
+  mv $app_root $temp_dir
+  rm -rf $TMP_WORK_DIR/*
+  mv $temp_dir/* $TMP_WORK_DIR
 
-  dokku_log_info2 "The application $APP is not defined in .dokku-monorepo!"
-  exit 1
-fi
+  exit
+done 10<"$TMP_WORK_DIR/.dokku-monorepo"
+
+dokku_log_info2 "The application $APP is not defined in .dokku-monorepo!"
+exit 1
