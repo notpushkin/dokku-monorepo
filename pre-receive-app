@@ -12,14 +12,13 @@ while IFS="=" read -u 10 -a line || [[ -n $line ]]; do
   [[ "${line[0]}" == "#"* || "${line[1]}" == "" ]] && continue
   [[ $APP != *"${line[0]}"* ]] && continue
 
-  dokku_log_info2 "Installing from ./${line[1]}"
+  app_subdir="${line[1]}"
+  dokku_log_info2 "Installing from ./$app_subdir"
 
-  app_root="$TMP_WORK_DIR/${line[1]}"
-  temp_dir=$(mktemp -u)
-
-  mv $app_root $temp_dir
-  rm -rf $TMP_WORK_DIR/*
-  mv $temp_dir/* $TMP_WORK_DIR
+  app_root="$TMP_WORK_DIR/$app_subdir"
+  mv "$TMP_WORK_DIR" "$TMP_WORK_DIR-remove-me"
+  mv "$TMP_WORK_DIR-remove-me/$app_subdir" "$TMP_WORK_DIR"
+  rm -rf "$TMP_WORK_DIR-remove-me"
 
   exit
 done 10<"$TMP_WORK_DIR/.dokku-monorepo"
