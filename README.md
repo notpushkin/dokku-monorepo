@@ -6,7 +6,7 @@ Dokku plugin for monorepo setups.
 ## Install
 
 ```
-dokku plugin:install https://github.com/iamale/dokku-monorepo
+dokku plugin:install https://gitlab.com/iamale/dokku-monorepo
 ```
 
 ## Usage
