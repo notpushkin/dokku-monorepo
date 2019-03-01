@@ -15,27 +15,17 @@ while IFS="=" read -u 10 -a line || [[ -n $line ]]; do
   app_subdir="${line[1]}"
   dokku_log_info2 "Installing from ./$app_subdir"
 
-  app_root="$TMP_WORK_DIR/$app_subdir"
-
   # Move the app we want to deploy to a temp directory.
-  APP_TMP_DIR="$(mktemp -d)"
-  mv "$app_root" "$APP_TMP_DIR"
+  app_tmp_dir="$(mktemp -d)"
+  mv -T "$TMP_WORK_DIR/$app_subdir" "$app_tmp_dir/app"
 
-  # The `rm -rf` and the `mv` commands for hidden files will
-  # print out errors and/or return a non-zero code even though
-  # they succeed. Suppress these so that the script can continue.
+  # Delete all files that aren't related to the app we are trying to deploy
+  find "$TMP_WORK_DIR" -mindepth 1 -delete
 
-  # Delete all files that aren't related to the app we are trying
-  # to deploy
-  rm -rf "$TMP_WORK_DIR"/* > /dev/null 2>&1 || true
-  rm -rf "$TMP_WORK_DIR"/.* > /dev/null 2>&1 || true
+  # Move the app back into the TMP_WORK_DIR
+  find "$app_tmp_dir/app" -mindepth 1 -maxdepth 1 -print0 | xargs -0 mv -t "$TMP_WORK_DIR"
 
-  # Move the files for the app back into the TMP_WORK_DIR
-  mv "$APP_TMP_DIR/$app_subdir"/* "$TMP_WORK_DIR" > /dev/null 2>&1 || true
-  mv "$APP_TMP_DIR/$app_subdir"/.* "$TMP_WORK_DIR" > /dev/null 2>&1 || true
-
-  rm -rf "$APP_TMP_DIR"
-
+  rm -rf "$app_tmp_dir"
   exit
 done 10<"$TMP_WORK_DIR/.dokku-monorepo"
 
