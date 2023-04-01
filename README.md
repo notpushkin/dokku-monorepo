@@ -3,6 +3,16 @@ dokku-monorepo
 
 Dokku plugin for monorepo setups.
 
+> ## Shameless plug
+>
+> Looking for something more robust? I'm currently working on Lunni, a
+> Docker PaaS which helps you deploy and manage apps on your own server. Paste
+> your docker-compose.yml file into the dashboard or link your Git repository,
+> make a couple tweaks and hit Deploy. [Learn more →](https://lunni.dev/)
+>
+> ![Lunni screenshot](https://lunni.dev/images/screenshot-hero.png)
+
+
 ## Install
 
 ```
